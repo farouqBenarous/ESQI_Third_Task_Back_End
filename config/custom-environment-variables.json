@@ -1,0 +1,5 @@
+{
+  "jwtPrivateKey": "jwtPrivateKey",
+  "DbString":"mongodb+srv://farouk:5hrvlvrurk45@cluster0-9qh0l.mongodb.net/Entreprise_Manager",
+  "Port": "Port"
+}
