@@ -10,7 +10,7 @@ const Fawn = require('fawn')
 mongoose.connect(config.get('DbString'))
 var tmp_collect = 'tmp_collect_for_entreprises_app'
 Fawn.init(mongoose ,tmp_collect );
-var {validateEntreprise , Entreprise , ValidateClient , exist_or_not , Validateemployee} = require("../models/entreprise")
+var {validateEntreprise , Entreprise , ValidateClient , exist_or_not , Validateemployee , ValidateWorkTime} = require("../models/entreprise")
 const {User } = require('../models/user');
 // game (game = ['casual','exhibition','competitive'] , time , location , duration , number_players , description , teams )
 
@@ -182,8 +182,49 @@ router.post('/employees/',auth ,  async (req, res) => {
 });
 
 
-router.post ('/startwork/' , auth ,  async  (req , res) => {
-    console.log(req.body)
+router.post ('/work/' , auth ,  async  (req , res) => {
+    const { error } = ValidateWorkTime(req.body);
+    if (error) {
+        console.log(error.message)
+        return res.status(400).send(error.details[0].message);}
+
+
+    // Set in my profile my work is working
+    let user = await User.findOne({ fullname : req.body.fullname})
+    if (!user){
+        console.log("User   does not exist he should create an account first   .")
+        return res.status(404).send('User  does not exist he should create an account first    .');
+    }
+
+    if (!exist_or_not(user.mywork , "id_work" ,req.body.id_work)) {
+        console.log("id_work Does not  Exist")
+        return res.status(400).send('id_work Does not Exist');}
+
+    let  mywork =user.mywork.filter((work)=> work.id_work == req.body.id_work)
+    mywork[0].work_times.push({ time :req.body.work_time})
+
+    // set in the entreprise
+    let entreprise = await  Entreprise.findOne({entreprise_name : req.body.entreprise_name})
+    if (!entreprise){
+        console.log("entreprise   does not exist he should create an account first   .")
+        return res.status(404).send('entreprise  does not exist he should create an account first    .'); }
+
+    if (!exist_or_not(entreprise.employees , "id_work" ,req.body.id_work)) {
+        console.log("id_work Does not  Exist")
+        return res.status(400).send('id_work Does not Exist');}
+    let employee = entreprise.employees.filter((emp) => {return emp.id_work == req.body.id_work})
+    employee[0].work_times.push({time :req.body.work_time})
+
+
+    var task = Fawn.Task();
+    task.update('users', {fullname : req.body.fullname} ,  {mywork : user.mywork   }  )
+        .update('entreprises', {entreprise_name : req.body.entreprise_name} , {employees : entreprise.employees} )
+        .run()
+        .then(  (results) =>   {console.log(results);return res.status(200).send(  { message : "Work Time Saved"} )})
+        .catch( function (err)  {return res.status(500).send(err)});
+
+
+
 
 })
 

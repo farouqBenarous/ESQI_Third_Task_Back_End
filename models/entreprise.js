@@ -81,6 +81,19 @@ function Validateemployee (employee) {
 }
 
 
+function ValidateWorkTime  (work) {
+
+    const schema = Joi.object({
+        id_work : Joi.string().min(5).max(50).required(),
+        entreprise_name : Joi.string().min(5).max(50).required(),
+        fullname : Joi.string().min(5).max(50).required(),
+        work_time: Joi.string().min(1).max(15).required(),
+
+    }).unknown();
+    return Joi.validate(work, schema);
+
+}
+
 function covert_to_array ( object) {
     var array =[] ;
     for (let i=0 ; i<object.length  ; i++)  {
@@ -108,4 +121,5 @@ exports.Entreprise = Entreprise;
 exports.validateEntreprise = validateEntreprise
 exports.ValidateClient =ValidateClient
 exports.Validateemployee =Validateemployee
+exports.ValidateWorkTime = ValidateWorkTime
 exports.exist_or_not =exist_or_not

@@ -15,7 +15,14 @@ Fawn.init(mongoose ,tmp_collect );
 
 // NORMAL USERS
 
-// get my information (
+//  get mywork with  specific id_work  (
+router.get('/me/work', auth, async (req, res) => {
+    const user = await User.findById(req.user._id).select('-password');
+    var work = user.mywork.filter((work) => {return  work.id_work == req.headers.id_work})
+    return res.send({list_work : work});
+});
+
+// get my information
 router.get('/me', auth, async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
     return res.send(user);
